@@ -1,0 +1,26 @@
+# ─── CREDENTIALS — never commit these ───
+config.py
+apply_bot/auto_apply.py
+
+# ─── Personal data ───
+data/resume.pdf
+data/jobs.db
+data/*.db
+
+# ─── Python ───
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.env
+
+# ─── OS files ───
+.DS_Store
+Thumbs.db
+*.log
+log.txt
+
+# ─── IDE ───
+.vscode/
+.idea/
