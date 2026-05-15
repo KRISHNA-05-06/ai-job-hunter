@@ -75,26 +75,35 @@ async def scrape_linkedin(role: str, location: str, max_jobs: int = 25) -> list[
                     link_el = await card.query_selector("a.base-card__full-link")
                     time_el = await card.query_selector("time")
 
-                    title = (await title_el.inner_text()).strip() if title_el else ""
-                    company = (await company_el.inner_text()).strip() if company_el else ""
-                    loc = (await location_el.inner_text()).strip() if location_el else ""
-                    href = await link_el.get_attribute("href") if link_el else ""
-                    posted = await time_el.get_attribute("datetime") if time_el else ""
+                    title   = (await title_el.inner_text()).strip()    if title_el    else ""
+                    company = (await company_el.inner_text()).strip()  if company_el  else ""
+                    loc     = (await location_el.inner_text()).strip() if location_el else ""
+                    href    = await link_el.get_attribute("href")      if link_el     else ""
+
+                    # LinkedIn <time> has both datetime attr and text like "2 hours ago"
+                    posted_at = ""
+                    if time_el:
+                        dt_attr = await time_el.get_attribute("datetime") or ""
+                        dt_text = (await time_el.inner_text()).strip()
+                        raw = dt_attr or dt_text
+                        if raw:
+                            from scrapers.date_utils import scrape_time_text
+                            posted_at = scrape_time_text(raw)
 
                     # Clean URL (remove tracking params after ?)
                     clean_url = href.split("?")[0] if href else ""
 
                     if title and company and clean_url:
                         jobs.append({
-                            "id": make_job_id(clean_url),
-                            "title": title,
-                            "company": company,
-                            "location": loc,
-                            "url": clean_url,
-                            "source": "LinkedIn",
-                            "posted_at": posted,
-                            "job_type": "Full-time",
-                            "description": "",  # fetched separately if needed
+                            "id":        make_job_id(clean_url),
+                            "title":     title,
+                            "company":   company,
+                            "location":  loc,
+                            "url":       clean_url,
+                            "source":    "LinkedIn",
+                            "posted_at": posted_at,
+                            "job_type":  "Full-time",
+                            "description": "",
                         })
                 except Exception:
                     continue
