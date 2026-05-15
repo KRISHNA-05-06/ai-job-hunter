@@ -16,6 +16,39 @@ def make_job_id(url: str) -> str:
     return "in_" + hashlib.md5(url.encode()).hexdigest()[:14]
 
 
+def _parse_indeed_date(text: str) -> str:
+    """
+    Convert Indeed's relative date text to an ISO datetime string.
+    Examples: 'just posted', 'today', '1 day ago', '3 days ago'
+    """
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    text = text.lower().strip()
+
+    if any(w in text for w in ["just posted", "today", "just now", "active"]):
+        return now.strftime("%Y-%m-%dT%H:%M:%S")
+    elif "hour" in text:
+        try:
+            hours = int(''.join(filter(str.isdigit, text)) or 1)
+            return (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%S")
+        except Exception:
+            return now.strftime("%Y-%m-%dT%H:%M:%S")
+    elif "day" in text:
+        try:
+            days = int(''.join(filter(str.isdigit, text)) or 1)
+            return (now - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
+        except Exception:
+            return (now - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%S")
+    elif "week" in text:
+        try:
+            weeks = int(''.join(filter(str.isdigit, text)) or 1)
+            return (now - timedelta(weeks=weeks)).strftime("%Y-%m-%dT%H:%M:%S")
+        except Exception:
+            return (now - timedelta(weeks=1)).strftime("%Y-%m-%dT%H:%M:%S")
+    else:
+        return now.strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def build_indeed_url(role: str, location: str) -> str:
     return (
         f"https://www.indeed.com/jobs?q={quote(role)}"
@@ -48,29 +81,39 @@ async def scrape_indeed(role: str, location: str, max_jobs: int = 25) -> list[di
 
             for card in cards[:max_jobs]:
                 try:
-                    title_el  = await card.query_selector("h2.jobTitle span, h2 a span")
-                    company_el = await card.query_selector("[data-testid='company-name'], .companyName")
+                    title_el    = await card.query_selector("h2.jobTitle span, h2 a span")
+                    company_el  = await card.query_selector("[data-testid='company-name'], .companyName")
                     location_el = await card.query_selector("[data-testid='text-location'], .companyLocation")
-                    link_el   = await card.query_selector("h2 a, a.jcs-JobTitle")
+                    link_el     = await card.query_selector("h2 a, a.jcs-JobTitle")
+                    date_el     = await card.query_selector(
+                        "[data-testid='myJobsStateDate'], .date, span.date, "
+                        "[class*='posted'], [class*='date'], span[class*='ago']"
+                    )
 
-                    title    = (await title_el.inner_text()).strip()   if title_el   else ""
-                    company  = (await company_el.inner_text()).strip() if company_el else ""
+                    title    = (await title_el.inner_text()).strip()    if title_el    else ""
+                    company  = (await company_el.inner_text()).strip()  if company_el  else ""
                     location = (await location_el.inner_text()).strip() if location_el else ""
-                    href     = await link_el.get_attribute("href")     if link_el    else ""
+                    href     = await link_el.get_attribute("href")      if link_el     else ""
+
+                    # Indeed shows "Posted 2 days ago" — convert to datetime
+                    posted_at = ""
+                    if date_el:
+                        date_text = (await date_el.inner_text()).strip().lower()
+                        posted_at = _parse_indeed_date(date_text)
 
                     if href and not href.startswith("http"):
                         href = "https://www.indeed.com" + href
 
                     if title and href:
                         jobs.append({
-                            "id":       make_job_id(href),
-                            "title":    title,
-                            "company":  company or "Unknown",
-                            "location": location,
-                            "url":      href,
-                            "source":   "Indeed",
-                            "posted_at": "",
-                            "job_type": "Full-time",
+                            "id":        make_job_id(href),
+                            "title":     title,
+                            "company":   company or "Unknown",
+                            "location":  location,
+                            "url":       href,
+                            "source":    "Indeed",
+                            "posted_at": posted_at,
+                            "job_type":  "Full-time",
                             "description": "",
                         })
                 except Exception:

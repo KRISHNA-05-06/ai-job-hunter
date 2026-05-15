@@ -60,29 +60,41 @@ async def scrape_glassdoor(role: str, max_jobs: int = 20) -> list[dict]:
 
             for card in cards[:max_jobs]:
                 try:
-                    title_el   = await card.query_selector("a.JobCard_seoLink__WdqHZ, [data-test='job-title'], .job-title")
-                    company_el = await card.query_selector("[data-test='employer-name'], .EmployerProfile_employerName__Xemli")
+                    title_el    = await card.query_selector("a.JobCard_seoLink__WdqHZ, [data-test='job-title'], .job-title")
+                    company_el  = await card.query_selector("[data-test='employer-name'], .EmployerProfile_employerName__Xemli")
                     location_el = await card.query_selector("[data-test='emp-location'], .JobCard_location__N_iYE")
-                    link_el    = await card.query_selector("a[href*='/job-listing/'], a[href*='/Job/']")
+                    link_el     = await card.query_selector("a[href*='/job-listing/'], a[href*='/Job/']")
+                    date_el     = await card.query_selector(
+                        "[data-test='job-age'], .JobCard_listingAge__KuaxZ, "
+                        "[class*='age'], [class*='date'], [class*='posted'], time"
+                    )
 
-                    title    = (await title_el.inner_text()).strip()    if title_el   else ""
-                    company  = (await company_el.inner_text()).strip()  if company_el else ""
+                    title    = (await title_el.inner_text()).strip()    if title_el    else ""
+                    company  = (await company_el.inner_text()).strip()  if company_el  else ""
                     location = (await location_el.inner_text()).strip() if location_el else ""
-                    href     = await link_el.get_attribute("href")      if link_el    else ""
+                    href     = await link_el.get_attribute("href")      if link_el     else ""
+
+                    posted_at = ""
+                    if date_el:
+                        dt_attr = await date_el.get_attribute("datetime") or ""
+                        dt_text = (await date_el.inner_text()).strip()
+                        raw = dt_attr or dt_text
+                        from scrapers.date_utils import scrape_time_text
+                        posted_at = scrape_time_text(raw)
 
                     if href and not href.startswith("http"):
                         href = "https://www.glassdoor.com" + href
 
                     if title and href:
                         jobs.append({
-                            "id":       make_job_id(href),
-                            "title":    title,
-                            "company":  company or "Unknown",
-                            "location": location,
-                            "url":      href,
-                            "source":   "Glassdoor",
-                            "posted_at": "",
-                            "job_type": "Full-time",
+                            "id":        make_job_id(href),
+                            "title":     title,
+                            "company":   company or "Unknown",
+                            "location":  location,
+                            "url":       href,
+                            "source":    "Glassdoor",
+                            "posted_at": posted_at,
+                            "job_type":  "Full-time",
                             "description": "",
                         })
                 except Exception:

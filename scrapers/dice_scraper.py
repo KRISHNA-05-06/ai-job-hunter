@@ -102,11 +102,24 @@ async def scrape_dice(role: str, max_jobs: int = 25) -> list[dict]:
                         link_el     = await card.query_selector(
                             "a[href*='job-detail'], a.card-title-link, h5 a"
                         )
+                        date_el     = await card.query_selector(
+                            "[data-cy='card-posted-date'], time, [class*='posted'], "
+                            "[class*='date'], [class*='ago']"
+                        )
 
                         title    = (await title_el.inner_text()).strip()    if title_el    else ""
                         company  = (await company_el.inner_text()).strip()  if company_el  else "Unknown"
                         location = (await location_el.inner_text()).strip() if location_el else "United States"
                         href     = await link_el.get_attribute("href")      if link_el     else ""
+
+                        posted_at = ""
+                        if date_el:
+                            dt_attr = await date_el.get_attribute("datetime") or ""
+                            dt_text = (await date_el.inner_text()).strip()
+                            raw = dt_attr or dt_text
+                            if raw:
+                                from scrapers.date_utils import scrape_time_text
+                                posted_at = scrape_time_text(raw)
 
                         if href and not href.startswith("http"):
                             href = "https://www.dice.com" + href
@@ -119,7 +132,7 @@ async def scrape_dice(role: str, max_jobs: int = 25) -> list[dict]:
                                 "location":    location,
                                 "url":         href,
                                 "source":      "Dice",
-                                "posted_at":   "",
+                                "posted_at":   posted_at,
                                 "job_type":    "Full-time",
                                 "description": "",
                             })

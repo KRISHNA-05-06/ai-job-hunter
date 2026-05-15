@@ -71,12 +71,25 @@ async def scrape_jobright(role: str, max_jobs: int = 20) -> list[dict]:
                         if href and not href.startswith("http"):
                             href = "https://jobright.ai" + href
 
+                    # Try to get posted date
+                    posted_at = ""
+                    for sel in ["time", "[class*='date']", "[class*='posted']", "[class*='ago']", "[class*='time']"]:
+                        date_el = await card.query_selector(sel)
+                        if date_el:
+                            dt_attr = await date_el.get_attribute("datetime") or ""
+                            dt_text = (await date_el.inner_text()).strip()
+                            raw = dt_attr or dt_text
+                            if raw:
+                                from scrapers.date_utils import scrape_time_text
+                                posted_at = scrape_time_text(raw)
+                                break
+
                     if title and href:
                         jobs.append({
                             "id": make_job_id(href), "title": title,
                             "company": company or "Unknown", "location": location,
                             "url": href, "source": "JobRight",
-                            "posted_at": "", "job_type": "Full-time", "description": "",
+                            "posted_at": posted_at, "job_type": "Full-time", "description": "",
                         })
                 except Exception:
                     continue

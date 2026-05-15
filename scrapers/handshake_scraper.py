@@ -57,29 +57,40 @@ async def scrape_handshake(role: str, max_jobs: int = 20) -> list[dict]:
 
             for card in cards[:max_jobs]:
                 try:
-                    title_el   = await card.query_selector("h3, h2, [data-hook='posting-name']")
-                    company_el = await card.query_selector("[data-hook='employer-name'], .employer-name")
+                    title_el    = await card.query_selector("h3, h2, [data-hook='posting-name']")
+                    company_el  = await card.query_selector("[data-hook='employer-name'], .employer-name")
                     location_el = await card.query_selector("[data-hook='posting-location'], .location")
-                    link_el    = await card.query_selector("a")
+                    link_el     = await card.query_selector("a")
+                    date_el     = await card.query_selector(
+                        "[data-hook='posting-date'], time, [class*='date'], [class*='posted'], [class*='ago']"
+                    )
 
                     title    = (await title_el.inner_text()).strip()    if title_el    else ""
                     company  = (await company_el.inner_text()).strip()  if company_el  else ""
                     location = (await location_el.inner_text()).strip() if location_el else ""
                     href     = await link_el.get_attribute("href")      if link_el     else ""
 
+                    posted_at = ""
+                    if date_el:
+                        dt_attr = await date_el.get_attribute("datetime") or ""
+                        dt_text = (await date_el.inner_text()).strip()
+                        raw = dt_attr or dt_text
+                        from scrapers.date_utils import scrape_time_text
+                        posted_at = scrape_time_text(raw)
+
                     if href and not href.startswith("http"):
                         href = "https://app.joinhandshake.com" + href
 
                     if title and href:
                         jobs.append({
-                            "id":       make_job_id(href),
-                            "title":    title,
-                            "company":  company or "Unknown",
-                            "location": location,
-                            "url":      href,
-                            "source":   "Handshake",
-                            "posted_at": "",
-                            "job_type": "Full-time",
+                            "id":        make_job_id(href),
+                            "title":     title,
+                            "company":   company or "Unknown",
+                            "location":  location,
+                            "url":       href,
+                            "source":    "Handshake",
+                            "posted_at": posted_at,
+                            "job_type":  "Full-time",
                             "description": "",
                         })
                 except Exception:
