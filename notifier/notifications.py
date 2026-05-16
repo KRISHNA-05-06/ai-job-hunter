@@ -346,6 +346,21 @@ def send_telegram_alert(jobs: list[dict]):
     except Exception as e:
         print(f"  ⚠️  Telegram error: {e}")
 
+def send_apply_notification(job: dict, success: bool):
+    if not NOTIFICATIONS["telegram_enabled"]:
+        return
+    status = "✅ Applied" if success else "❌ Failed"
+    msg = f"{status}: {job['title']} @ {job['company']}\n{job['url']}"
+    token   = NOTIFICATIONS["telegram_bot_token"]
+    chat_id = NOTIFICATIONS["telegram_chat_id"]
+    url  = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = json.dumps({"chat_id": chat_id, "text": msg}).encode()
+    try:
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
+
 
 def notify_all(jobs: list[dict]):
     if not jobs:
