@@ -1,0 +1,153 @@
+name: Job Hunter Bot
+
+on:
+  schedule:
+    # Times are in UTC. Tampa FL is UTC-4 (EDT) in summer, UTC-5 (EST) in winter
+    # These run at: 6AM, 9AM, 12PM, 3PM, 6PM EDT (UTC-4)
+    - cron: '0 10 * * *'   # 6:00 AM EDT
+    - cron: '0 13 * * *'   # 9:00 AM EDT
+    - cron: '0 16 * * *'   # 12:00 PM EDT
+    - cron: '0 19 * * *'   # 3:00 PM EDT
+    - cron: '0 22 * * *'   # 6:00 PM EDT
+
+  # Allow manual trigger from GitHub website anytime
+  workflow_dispatch:
+
+jobs:
+  scrape-and-notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # Step 1 — Check out your code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2 — Set up Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Step 3 — Cache pip packages (speeds up future runs)
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      # Step 4 — Install Python dependencies
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Step 5 — Install Playwright browser
+      - name: Install Playwright Chromium
+        run: playwright install chromium --with-deps
+
+      # Step 6 — Create config.py from GitHub Secrets
+      - name: Create config.py from secrets
+        env:
+          GROQ_API_KEY:      ${{ secrets.GROQ_API_KEY }}
+          EMAIL_SENDER:      ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD:    ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECIPIENT:   ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          cat > config.py << PYEOF
+          PROFILE = {
+              "name": "Sri Krishna Sai Kota",
+              "email": "srikrishnasaikota@gmail.com",
+              "phone": "813-509-4528",
+              "linkedin": "https://www.linkedin.com/in/srikrishnasai/",
+              "github": "https://github.com/KRISHNA-05-06",
+              "location": "Tampa, FL",
+              "resume_path": "data/resume.pdf",
+              "skills": [
+                  "Python", "SQL", "Apache Spark", "Apache Kafka", "Apache Airflow",
+                  "AWS Glue", "AWS EMR", "AWS S3", "AWS Redshift", "Databricks",
+                  "Snowflake", "dbt", "Hadoop", "Hive", "PostgreSQL", "MySQL",
+                  "MongoDB", "Docker", "Kubernetes", "Git", "PySpark",
+                  "Data Modeling", "ETL", "ELT", "Data Lakes", "Data Warehouses",
+                  "Streaming", "Batch Processing", "Grafana", "CloudWatch"
+              ],
+              "education": "M.S. in Computer Science - University of South Florida (2024-2026)",
+              "experience_years": 1,
+              "summary": (
+                  "Aspiring Data Engineer pursuing M.S. in Computer Science with hands-on "
+                  "experience building scalable ETL/ELT pipelines and real-time data systems "
+                  "using Python and SQL. Skilled in Apache Spark, Kafka, and AWS."
+              ),
+          }
+
+          SEARCH = {
+              "roles": [
+                  "Data Engineer",
+                  "Junior Data Engineer",
+                  "Entry Level Data Engineer",
+                  "ETL Developer",
+                  "Big Data Engineer",
+              ],
+              "locations": ["United States"],
+              "job_types": ["Full-time"],
+              "experience_levels": ["Entry level", "Associate"],
+              "min_match_score": 65,
+              "auto_apply_min_score": 80,
+              "blacklist_companies": [],
+              "keywords_required": ["data engineer", "data pipeline", "etl", "spark", "aws"],
+              "keywords_excluded": [
+                  "senior", "staff", "principal", "lead", "10+ years",
+                  "philippines", "india", "poland", "spain", "portugal",
+                  "brazil", "canada", "uk", "united kingdom", "australia",
+              ],
+          }
+
+          SCHEDULER = {
+              "check_interval_minutes": 60,
+              "max_applies_per_day": 0,
+              "apply_delay_seconds": 45,
+          }
+
+          NOTIFICATIONS = {
+              "email_enabled": True,
+              "email_sender":    "$EMAIL_SENDER",
+              "email_password":  "$EMAIL_PASSWORD",
+              "email_recipient": "$EMAIL_RECIPIENT",
+              "telegram_enabled": False,
+              "telegram_bot_token": "",
+              "telegram_chat_id": "",
+          }
+
+          AI = {
+              "groq_api_key": "$GROQ_API_KEY",
+              "model": "llama-3.1-8b-instant",
+              "match_model": "llama-3.1-8b-instant",
+          }
+
+          DATABASE = {
+              "path": "data/jobs.db",
+          }
+          PYEOF
+
+      # Step 7 — Restore jobs database from cache
+      # This is critical — it prevents sending duplicate alerts across runs
+      - name: Restore jobs database
+        uses: actions/cache@v4
+        with:
+          path: data/jobs.db
+          key: jobs-db-${{ github.run_id }}
+          restore-keys: |
+            jobs-db-
+
+      # Step 8 — Create data directory if it doesn't exist
+      - name: Create data directory
+        run: mkdir -p data
+
+      # Step 9 — Run the bot
+      - name: Run Job Hunter
+        run: python main.py --once --no-apply
+
+      # Step 10 — Save updated database for next run
+      - name: Save jobs database
+        uses: actions/cache@v4
+        with:
+          path: data/jobs.db
+          key: jobs-db-${{ github.run_id }}
