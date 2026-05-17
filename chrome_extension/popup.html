@@ -24,209 +24,82 @@
   .stat-val.green  { color: #00d4a0; }
   .stat-val.yellow { color: #ffd166; }
   .stat-val.accent { color: #6c63ff; }
-  .app-item {
-    padding: 8px 0;
-    border-bottom: 1px solid #1a1a26;
-    font-size: 12px;
-  }
+  .app-item { padding: 8px 0; border-bottom: 1px solid #1a1a26; font-size: 12px; }
   .app-item:last-child { border-bottom: none; }
   .app-title   { color: #e8e8f0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .app-company { color: #6b6b8a; margin-top: 2px; }
-  .status-dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    margin-right: 5px;
-    vertical-align: middle;
-  }
+  .status-dot  { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
   .dot-applied   { background: #6c63ff; }
   .dot-interview { background: #ffd166; }
   .dot-offer     { background: #00d4a0; }
   .dot-rejected  { background: #ff6b6b; }
   .dot-ghosted   { background: #6b6b8a; }
   .btn-open {
-    display: block;
-    width: calc(100% - 32px);
-    margin: 14px 16px;
+    display: block; width: calc(100% - 32px); margin: 14px 16px;
     background: linear-gradient(135deg, #6c63ff, #9c8fff);
-    color: white;
-    border: none;
-    border-radius: 9px;
-    padding: 11px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    letter-spacing: .02em;
+    color: white; border: none; border-radius: 9px; padding: 11px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: .02em;
     transition: opacity .15s;
   }
   .btn-open:hover { opacity: .9; }
   .resume-section { padding: 12px 16px; }
   .resume-label { font-size: 11px; color: #6b6b8a; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
   .resume-inp {
-    width: 100%;
-    background: #1a1a26;
-    border: 1px solid #2a2a3a;
-    border-radius: 7px;
-    color: #e8e8f0;
-    font-size: 12px;
-    padding: 7px 10px;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin-bottom: 6px;
+    width: 100%; background: #1a1a26; border: 1px solid #2a2a3a;
+    border-radius: 7px; color: #e8e8f0; font-size: 12px; padding: 7px 10px;
+    font-family: 'Segoe UI', Arial, sans-serif; margin-bottom: 6px;
+    outline: none; box-sizing: border-box;
   }
-  .resume-list { display: flex; flex-direction: column; gap: 4px; max-height: 100px; overflow-y: auto; }
+  .resume-inp:focus { border-color: #6c63ff; }
+  .resume-list { display: flex; flex-direction: column; gap: 4px; max-height: 100px; overflow-y: auto; margin-bottom: 6px; }
   .resume-tag {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #1a1a26;
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 11px;
-    color: #4ecdc4;
-    font-family: 'Courier New', monospace;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #1a1a26; border-radius: 6px; padding: 5px 10px;
+    font-size: 11px; color: #4ecdc4; font-family: 'Courier New', monospace;
   }
   .resume-del { background: none; border: none; color: #6b6b8a; cursor: pointer; font-size: 13px; }
   .resume-del:hover { color: #ff6b6b; }
   .add-resume-btn {
-    width: 100%;
-    background: #1a1a26;
-    border: 1px solid #2a2a3a;
-    border-radius: 7px;
-    color: #6c63ff;
-    font-size: 12px;
-    padding: 6px;
-    cursor: pointer;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin-top: 4px;
+    width: 100%; background: #1a1a26; border: 1px solid #2a2a3a;
+    border-radius: 7px; color: #6c63ff; font-size: 12px; padding: 6px;
+    cursor: pointer; font-family: 'Segoe UI', Arial, sans-serif;
   }
-  .empty { text-align: center; padding: 20px; color: #6b6b8a; font-size: 12px; }
+  .add-resume-btn:hover { border-color: #6c63ff; }
+  .empty { text-align: center; padding: 16px; color: #6b6b8a; font-size: 12px; }
   .active-badge {
-    display: inline-block;
-    background: #00d4a022;
-    color: #00d4a0;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    margin-left: 8px;
-    font-weight: 600;
+    display: inline-block; background: #00d4a022; color: #00d4a0;
+    font-size: 10px; padding: 2px 8px; border-radius: 20px;
+    margin-left: 8px; font-weight: 600;
   }
 </style>
 </head>
 <body>
+
 <div class="header">
   <h1>🎯 Job Hunter <span class="active-badge">ACTIVE</span></h1>
   <p>Auto-logging your applications</p>
 </div>
 
-<!-- Stats -->
-<div class="section" id="statsSection">
+<div class="section">
   <div class="section-title">Quick Stats</div>
   <div id="statsContent"><div class="empty">No applications yet</div></div>
 </div>
 
-<!-- Recent apps -->
-<div class="section" id="recentSection">
+<div class="section">
   <div class="section-title">Recent Applications</div>
   <div id="recentContent"><div class="empty">Apply to a job to get started</div></div>
 </div>
 
-<!-- Open tracker -->
 <button class="btn-open" id="openTracker">📊 Open Full Dashboard</button>
 
-<!-- Resume manager -->
 <div class="resume-section">
   <div class="resume-label">My Resume Versions</div>
   <div class="resume-list" id="resumeList"></div>
   <input type="text" class="resume-inp" id="resumeInp" placeholder="resume_v2_dataeng.pdf">
-  <button class="add-resume-btn" onclick="addResume()">+ Add Resume</button>
+  <button class="add-resume-btn" id="addResumeBtn">+ Add Resume Version</button>
 </div>
 
-<script>
-const STATUS_COLORS = {
-  applied:'dot-applied', interview:'dot-interview',
-  offer:'dot-offer', rejected:'dot-rejected', ghosted:'dot-ghosted'
-};
-
-function init() {
-  chrome.storage.local.get(['applications','resumes'], (result) => {
-    const apps    = result.applications || [];
-    const resumes = result.resumes || [];
-
-    // Stats
-    const statsEl = document.getElementById('statsContent');
-    if (apps.length > 0) {
-      const today   = new Date().toISOString().split('T')[0];
-      const todayN  = apps.filter(a => a.date === today).length;
-      const intrN   = apps.filter(a => a.status === 'interview').length;
-      const offerN  = apps.filter(a => a.status === 'offer').length;
-      statsEl.innerHTML = `
-        <div class="stat-row"><span class="stat-label">Total Applied</span><span class="stat-val accent">${apps.length}</span></div>
-        <div class="stat-row"><span class="stat-label">Applied Today</span><span class="stat-val green">${todayN}</span></div>
-        <div class="stat-row"><span class="stat-label">Interviews</span><span class="stat-val yellow">${intrN}</span></div>
-        <div class="stat-row"><span class="stat-label">Offers</span><span class="stat-val green">${offerN}</span></div>`;
-    }
-
-    // Recent
-    const recentEl = document.getElementById('recentContent');
-    if (apps.length > 0) {
-      recentEl.innerHTML = apps.slice(0,5).map(a => `
-        <div class="app-item">
-          <div class="app-title">
-            <span class="status-dot ${STATUS_COLORS[a.status]||'dot-applied'}"></span>
-            ${a.title}
-          </div>
-          <div class="app-company">${a.company} · ${a.platform} · ${a.date}</div>
-        </div>`).join('');
-    }
-
-    // Resumes
-    renderResumes(resumes);
-  });
-}
-
-function renderResumes(resumes) {
-  const list = document.getElementById('resumeList');
-  if (resumes.length === 0) {
-    list.innerHTML = '<div class="empty">No resumes added yet</div>';
-    return;
-  }
-  list.innerHTML = resumes.map((r,i) => `
-    <div class="resume-tag">
-      <span>📄 ${r}</span>
-      <button class="resume-del" onclick="deleteResume(${i})">✕</button>
-    </div>`).join('');
-}
-
-function addResume() {
-  const inp = document.getElementById('resumeInp');
-  const val = inp.value.trim();
-  if (!val) return;
-  chrome.storage.local.get(['resumes'], (r) => {
-    const resumes = r.resumes || [];
-    if (!resumes.includes(val)) {
-      resumes.push(val);
-      chrome.storage.local.set({ resumes }, () => {
-        renderResumes(resumes);
-        inp.value = '';
-      });
-    }
-  });
-}
-
-function deleteResume(index) {
-  chrome.storage.local.get(['resumes'], (r) => {
-    const resumes = r.resumes || [];
-    resumes.splice(index, 1);
-    chrome.storage.local.set({ resumes }, () => renderResumes(resumes));
-  });
-}
-
-document.getElementById('openTracker').onclick = () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('tracker.html') });
-};
-
-init();
-</script>
+<script src="popup.js"></script>
 </body>
 </html>
