@@ -1,0 +1,258 @@
+{
+  "last_updated": "2026-05-17T17:30:06.538454",
+  "stats": {
+    "total_emails_processed": 10,
+    "new_this_run": 10
+  },
+  "all_updates": [
+    {
+      "email_id": "14437",
+      "category": "submission",
+      "company": "Humana",
+      "job_title": "relative; } figure",
+      "platform": "Direct",
+      "subject": "Sri Krishna Sai, please provide feedback on your application\r\n process with Humana or one of its subsidiaries, Centerwell or Conviva",
+      "sender": "Humana <humanacareers@humana.com>",
+      "date": "Sun, 17 May 2026 03:45:48 +0000",
+      "body_preview": "<html> <head> <style> /*https://ckeditor.com/docs/ckeditor5/latest/builds/guides/integration/content-styles.html#the-full-list-of-content-styles */ figure{display:block;margin:0;} figure.image { position: relative; } figure.image-style-align-left { float: left; margin-right: 1.5em; } figure.image-st",
+      "processed_at": "2026-05-17T17:30:00.741452"
+    },
+    {
+      "email_id": "14443",
+      "category": "interview",
+      "company": "Myworkday",
+      "job_title": "Data Engineer Role",
+      "platform": "Direct",
+      "subject": "Data Analytics Engineer with Axos Bank",
+      "sender": "Axos <axos@myworkday.com>",
+      "date": "Sun, 17 May 2026 07:02:49 +0000",
+      "body_preview": "#outlook a { padding:0; } body { margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; } table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt; } img { border:0;height:auto;line-height:100%; outline:none;text-decoration:none;-ms-interpolation-mode:bicub",
+      "processed_at": "2026-05-17T17:30:01.481563"
+    },
+    {
+      "email_id": "14445",
+      "category": "offer",
+      "company": "Email",
+      "job_title": "seekers just like you during every step of their job search",
+      "platform": "Direct",
+      "subject": "Let\u2019s get you hired, Sri krishna sai  ",
+      "sender": "\"Anna Bauer | JobLeads\" <anna.bauer@email.jobleads.com>",
+      "date": "17 May 2026 10:13:17 +0000",
+      "body_preview": "Hello Sri krishna sai, For over 15 years, we've been guiding and coaching job seekers just like you during every step of their job search. There are three success factors to landing a great job: Successful networking Professional application documents Access to all relevant job offers Start your suc",
+      "processed_at": "2026-05-17T17:30:01.821093"
+    },
+    {
+      "email_id": "14450",
+      "category": "followup",
+      "company": "Monster",
+      "job_title": "alert for: Data Engineer",
+      "platform": "Direct",
+      "subject": "Your job alert for: Data Engineer, Bellevue, Washington",
+      "sender": "\"Monster\" <monster@notifications.monster.com>",
+      "date": "Sun, 17 May 2026 04:05:05 +0000",
+      "body_preview": "Monster span, td, table, div, a {font-family: Arial, serif !important;} /* Outlook 2016 Height Fix */ table, tr, td {border-collapse: collapse;} tr {font-size:0px; line-height:0px; border-collapse: collapse; } sup {font-size:100% !important; line-height:0px; vertical-align:2px; } 96 body { -webkit-t",
+      "processed_at": "2026-05-17T17:30:02.498170"
+    },
+    {
+      "email_id": "14458",
+      "category": "submission",
+      "company": "The Best Postcards is",
+      "job_title": "Data Engineer",
+      "platform": "Glassdoor",
+      "subject": "The Best Postcards is hiring for Junior Data Engineer. Apply Now.",
+      "sender": "Glassdoor Jobs <noreply@glassdoor.com>",
+      "date": "Sun, 17 May 2026 16:34:44 +0000 (UTC)",
+      "body_preview": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html dir=\"ltr\" lang=\"en\"><head><link rel=\"preload\" as=\"image\" href=\"https://www.glassdoor.com/assets/email/brandRefresh/logo.png\"/><link rel=\"preload\" as=\"image\" href=\"https://ww",
+      "processed_at": "2026-05-17T17:30:03.283073"
+    },
+    {
+      "email_id": "14461",
+      "category": "followup",
+      "company": "Unknown Company",
+      "job_title": "in Charlotte",
+      "platform": "Glassdoor",
+      "subject": "Data Engineer at AssetMark and 1 more job in Charlotte, NC for you.\r\n Apply Now.",
+      "sender": "Glassdoor Jobs <noreply@glassdoor.com>",
+      "date": "Sun, 17 May 2026 16:50:22 +0000 (UTC)",
+      "body_preview": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html dir=\"ltr\" lang=\"en\"><head><link rel=\"preload\" as=\"image\" href=\"https://www.glassdoor.com/assets/email/brandRefresh/logo.png\"/><link rel=\"preload\" as=\"image\" href=\"https://ww",
+      "processed_at": "2026-05-17T17:30:03.808054"
+    },
+    {
+      "email_id": "14468",
+      "category": "followup",
+      "company": "Unknown Company",
+      "job_title": "at Randstad Digital Americas is still available",
+      "platform": "LinkedIn",
+      "subject": "Sri Krishna Sai, apply now to \u2018Databricks Data Engineer at Randstad Digital Americas\u2019",
+      "sender": "LinkedIn <jobs-noreply@linkedin.com>",
+      "date": "Sun, 17 May 2026 17:31:49 +0000 (UTC)",
+      "body_preview": "Your saved job at Randstad Digital Americas is still available. Databricks Data Engineer Randstad Digital Americas Richmond, Virginia, United States 2 company alumni View job: https://www.linkedin.com/comm/jobs/view/4415556079?trackingId=&refId=&lipi=urn%3Ali%3Apage%3Aemail_email_jobs_saved_job_remi",
+      "processed_at": "2026-05-17T17:30:05.141355"
+    },
+    {
+      "email_id": "14471",
+      "category": "submission",
+      "company": "Hrapply",
+      "job_title": "Data Engineer Role",
+      "platform": "Direct",
+      "subject": "Welcome to Travelers Talent Community!",
+      "sender": "Travelers Careers <recruiting@hrapply.com>",
+      "date": "Sun, 17 May 2026 18:03:07 +0000 (UTC)",
+      "body_preview": "<html> <head> <title>Travelers</title> <style type=\"text/css\">.tds-button--primary{ color:#fff; font-weight:600; background-color:#e01719; padding:15px 30px; text-decoration:none; font-family:Arial, sans-serif; } .tds-button--primary:hover{ background-color:#af1214; color:#fff !important; } </style>",
+      "processed_at": "2026-05-17T17:30:05.501536"
+    },
+    {
+      "email_id": "14482",
+      "category": "submission",
+      "company": "Unknown Company",
+      "job_title": "Data Engineer Your application has been submitted",
+      "platform": "Indeed",
+      "subject": "Indeed Application: Data Engineer",
+      "sender": "\"Indeed Apply\" <indeedapply@indeed.com>",
+      "date": "Sun, 17 May 2026 20:35:13 +0000",
+      "body_preview": "Your application has been submitted. Good luck! If you notice an error in your application, please Contact Indeed <https://apply.indeed.com/indeedapply/confirmemail/contactus?iaUid=1jorq38dpgb0r801&apiToken=aa102235a5ccb18bd3668c0e14aa3ea7e2503cfac2a7a9bf3d6549899e125af4> ------ Indeed - one search.",
+      "processed_at": "2026-05-17T17:30:06.236151"
+    },
+    {
+      "email_id": "14484",
+      "category": "interview",
+      "company": "Remotehunter",
+      "job_title": "search just got a whole lot easier",
+      "platform": "Direct",
+      "subject": "Welcome to RemoteHunter, Sri krishna sai",
+      "sender": "RemoteHunter <hello@mail.remotehunter.com>",
+      "date": "Sun, 17 May 2026 21:01:47 +0000",
+      "body_preview": "Your remote job search just got a whole lot easier. RemoteHunter - Welcome RemoteHunter ( https://www.remotehunter.com/candidates-dashboard/dashboard?utm_source=email&utm_medium=welcome_series&utm_campaign=welcome_1 ) Hi Sri krishna sai, Thanks for joining RemoteHunter. This is your shortcut to find",
+      "processed_at": "2026-05-17T17:30:06.236151"
+    }
+  ],
+  "heard_back": [
+    {
+      "email_id": "14443",
+      "category": "interview",
+      "company": "Myworkday",
+      "job_title": "Data Engineer Role",
+      "platform": "Direct",
+      "subject": "Data Analytics Engineer with Axos Bank",
+      "sender": "Axos <axos@myworkday.com>",
+      "date": "Sun, 17 May 2026 07:02:49 +0000",
+      "body_preview": "#outlook a { padding:0; } body { margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; } table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt; } img { border:0;height:auto;line-height:100%; outline:none;text-decoration:none;-ms-interpolation-mode:bicub",
+      "processed_at": "2026-05-17T17:30:01.481563"
+    },
+    {
+      "email_id": "14445",
+      "category": "offer",
+      "company": "Email",
+      "job_title": "seekers just like you during every step of their job search",
+      "platform": "Direct",
+      "subject": "Let\u2019s get you hired, Sri krishna sai  ",
+      "sender": "\"Anna Bauer | JobLeads\" <anna.bauer@email.jobleads.com>",
+      "date": "17 May 2026 10:13:17 +0000",
+      "body_preview": "Hello Sri krishna sai, For over 15 years, we've been guiding and coaching job seekers just like you during every step of their job search. There are three success factors to landing a great job: Successful networking Professional application documents Access to all relevant job offers Start your suc",
+      "processed_at": "2026-05-17T17:30:01.821093"
+    },
+    {
+      "email_id": "14484",
+      "category": "interview",
+      "company": "Remotehunter",
+      "job_title": "search just got a whole lot easier",
+      "platform": "Direct",
+      "subject": "Welcome to RemoteHunter, Sri krishna sai",
+      "sender": "RemoteHunter <hello@mail.remotehunter.com>",
+      "date": "Sun, 17 May 2026 21:01:47 +0000",
+      "body_preview": "Your remote job search just got a whole lot easier. RemoteHunter - Welcome RemoteHunter ( https://www.remotehunter.com/candidates-dashboard/dashboard?utm_source=email&utm_medium=welcome_series&utm_campaign=welcome_1 ) Hi Sri krishna sai, Thanks for joining RemoteHunter. This is your shortcut to find",
+      "processed_at": "2026-05-17T17:30:06.236151"
+    }
+  ],
+  "submissions": [
+    {
+      "email_id": "14437",
+      "category": "submission",
+      "company": "Humana",
+      "job_title": "relative; } figure",
+      "platform": "Direct",
+      "subject": "Sri Krishna Sai, please provide feedback on your application\r\n process with Humana or one of its subsidiaries, Centerwell or Conviva",
+      "sender": "Humana <humanacareers@humana.com>",
+      "date": "Sun, 17 May 2026 03:45:48 +0000",
+      "body_preview": "<html> <head> <style> /*https://ckeditor.com/docs/ckeditor5/latest/builds/guides/integration/content-styles.html#the-full-list-of-content-styles */ figure{display:block;margin:0;} figure.image { position: relative; } figure.image-style-align-left { float: left; margin-right: 1.5em; } figure.image-st",
+      "processed_at": "2026-05-17T17:30:00.741452"
+    },
+    {
+      "email_id": "14458",
+      "category": "submission",
+      "company": "The Best Postcards is",
+      "job_title": "Data Engineer",
+      "platform": "Glassdoor",
+      "subject": "The Best Postcards is hiring for Junior Data Engineer. Apply Now.",
+      "sender": "Glassdoor Jobs <noreply@glassdoor.com>",
+      "date": "Sun, 17 May 2026 16:34:44 +0000 (UTC)",
+      "body_preview": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html dir=\"ltr\" lang=\"en\"><head><link rel=\"preload\" as=\"image\" href=\"https://www.glassdoor.com/assets/email/brandRefresh/logo.png\"/><link rel=\"preload\" as=\"image\" href=\"https://ww",
+      "processed_at": "2026-05-17T17:30:03.283073"
+    },
+    {
+      "email_id": "14471",
+      "category": "submission",
+      "company": "Hrapply",
+      "job_title": "Data Engineer Role",
+      "platform": "Direct",
+      "subject": "Welcome to Travelers Talent Community!",
+      "sender": "Travelers Careers <recruiting@hrapply.com>",
+      "date": "Sun, 17 May 2026 18:03:07 +0000 (UTC)",
+      "body_preview": "<html> <head> <title>Travelers</title> <style type=\"text/css\">.tds-button--primary{ color:#fff; font-weight:600; background-color:#e01719; padding:15px 30px; text-decoration:none; font-family:Arial, sans-serif; } .tds-button--primary:hover{ background-color:#af1214; color:#fff !important; } </style>",
+      "processed_at": "2026-05-17T17:30:05.501536"
+    },
+    {
+      "email_id": "14482",
+      "category": "submission",
+      "company": "Unknown Company",
+      "job_title": "Data Engineer Your application has been submitted",
+      "platform": "Indeed",
+      "subject": "Indeed Application: Data Engineer",
+      "sender": "\"Indeed Apply\" <indeedapply@indeed.com>",
+      "date": "Sun, 17 May 2026 20:35:13 +0000",
+      "body_preview": "Your application has been submitted. Good luck! If you notice an error in your application, please Contact Indeed <https://apply.indeed.com/indeedapply/confirmemail/contactus?iaUid=1jorq38dpgb0r801&apiToken=aa102235a5ccb18bd3668c0e14aa3ea7e2503cfac2a7a9bf3d6549899e125af4> ------ Indeed - one search.",
+      "processed_at": "2026-05-17T17:30:06.236151"
+    }
+  ],
+  "interviews": [
+    {
+      "email_id": "14443",
+      "category": "interview",
+      "company": "Myworkday",
+      "job_title": "Data Engineer Role",
+      "platform": "Direct",
+      "subject": "Data Analytics Engineer with Axos Bank",
+      "sender": "Axos <axos@myworkday.com>",
+      "date": "Sun, 17 May 2026 07:02:49 +0000",
+      "body_preview": "#outlook a { padding:0; } body { margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; } table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt; } img { border:0;height:auto;line-height:100%; outline:none;text-decoration:none;-ms-interpolation-mode:bicub",
+      "processed_at": "2026-05-17T17:30:01.481563"
+    },
+    {
+      "email_id": "14484",
+      "category": "interview",
+      "company": "Remotehunter",
+      "job_title": "search just got a whole lot easier",
+      "platform": "Direct",
+      "subject": "Welcome to RemoteHunter, Sri krishna sai",
+      "sender": "RemoteHunter <hello@mail.remotehunter.com>",
+      "date": "Sun, 17 May 2026 21:01:47 +0000",
+      "body_preview": "Your remote job search just got a whole lot easier. RemoteHunter - Welcome RemoteHunter ( https://www.remotehunter.com/candidates-dashboard/dashboard?utm_source=email&utm_medium=welcome_series&utm_campaign=welcome_1 ) Hi Sri krishna sai, Thanks for joining RemoteHunter. This is your shortcut to find",
+      "processed_at": "2026-05-17T17:30:06.236151"
+    }
+  ],
+  "offers": [
+    {
+      "email_id": "14445",
+      "category": "offer",
+      "company": "Email",
+      "job_title": "seekers just like you during every step of their job search",
+      "platform": "Direct",
+      "subject": "Let\u2019s get you hired, Sri krishna sai  ",
+      "sender": "\"Anna Bauer | JobLeads\" <anna.bauer@email.jobleads.com>",
+      "date": "17 May 2026 10:13:17 +0000",
+      "body_preview": "Hello Sri krishna sai, For over 15 years, we've been guiding and coaching job seekers just like you during every step of their job search. There are three success factors to landing a great job: Successful networking Professional application documents Access to all relevant job offers Start your suc",
+      "processed_at": "2026-05-17T17:30:01.821093"
+    }
+  ],
+  "rejections": []
+}

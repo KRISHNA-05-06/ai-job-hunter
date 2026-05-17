@@ -26,7 +26,12 @@ except ImportError:
     def process_emails():
         print("  ℹ️  Gmail reader not available.")
         return {}
-from apply_bot.auto_apply import run_auto_apply
+#from apply_bot.auto_apply import run_auto_apply
+try:
+    from apply_bot.auto_apply import run_auto_apply
+except ImportError:
+    async def run_auto_apply(jobs):
+        print("  ℹ️  Auto-apply module not available in this environment.")
 
 
 SCRAPERS = [
