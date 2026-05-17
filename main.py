@@ -19,7 +19,12 @@ from scrapers.dice_scraper      import run_dice_scraper
 from scrapers.handshake_scraper import run_handshake_scraper
 from ai_engine.matcher import filter_jobs, preload_common_answers
 from notifier.notifications import notify_all
-from apply_bot.auto_apply import run_auto_apply
+#from apply_bot.auto_apply import run_auto_apply
+try:
+    from apply_bot.auto_apply import run_auto_apply
+except ImportError:
+    async def run_auto_apply(jobs):
+        print("  ℹ️  Auto-apply module not available in this environment.")
 
 
 SCRAPERS = [
