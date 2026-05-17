@@ -346,21 +346,6 @@ def send_telegram_alert(jobs: list[dict]):
     except Exception as e:
         print(f"  ⚠️  Telegram error: {e}")
 
-def send_apply_notification(job: dict, success: bool):
-    if not NOTIFICATIONS["telegram_enabled"]:
-        return
-    status = "✅ Applied" if success else "❌ Failed"
-    msg = f"{status}: {job['title']} @ {job['company']}\n{job['url']}"
-    token   = NOTIFICATIONS["telegram_bot_token"]
-    chat_id = NOTIFICATIONS["telegram_chat_id"]
-    url  = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = json.dumps({"chat_id": chat_id, "text": msg}).encode()
-    try:
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        urllib.request.urlopen(req, timeout=10)
-    except Exception:
-        pass
-
 
 def notify_all(jobs: list[dict]):
     if not jobs:
@@ -368,3 +353,128 @@ def notify_all(jobs: list[dict]):
         return
     send_email_alert(jobs)
     send_telegram_alert(jobs)
+
+
+def send_heard_back_alert(heard_back: list[dict]):
+    """Send a special email when companies respond — interviews, offers, rejections."""
+    if not NOTIFICATIONS["email_enabled"] or not heard_back:
+        return
+
+    cfg = NOTIFICATIONS
+    now = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+
+    cat_meta = {
+        "interview": {"color": "#ffd166", "bg": "#fef3c7", "emoji": "📞", "label": "Interview Invitation"},
+        "offer":     {"color": "#00d4a0", "bg": "#dcfce7", "emoji": "🎉", "label": "Offer Received"},
+        "rejection": {"color": "#ff6b6b", "bg": "#fee2e2", "emoji": "❌", "label": "Rejection"},
+        "followup":  {"color": "#4ecdc4", "bg": "#e0f7f6", "emoji": "💬", "label": "Follow-up"},
+    }
+
+    rows = ""
+    for item in heard_back:
+        meta = cat_meta.get(item["category"], {"color": "#6b6b8a", "bg": "#f8fafc", "emoji": "📧", "label": item["category"].title()})
+        rows += f"""
+        <tr>
+          <td style="padding:14px 16px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <span style="font-size:18px;">{meta['emoji']}</span>
+              <span style="background:{meta['bg']};color:{meta['color']};padding:3px 10px;
+                           border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;">
+                {meta['label']}
+              </span>
+            </div>
+            <div style="font-weight:600;font-size:14px;color:#1e293b;margin-bottom:3px;">
+              {item.get('company','Unknown Company')}
+            </div>
+            <div style="color:#64748b;font-size:12px;margin-bottom:6px;">
+              {item.get('job_title','Data Engineer Role')} · {item.get('platform','Direct')}
+            </div>
+            <div style="font-size:12px;color:#475569;font-style:italic;">
+              Subject: {item.get('subject','')[:80]}
+            </div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px;background:#f8fafc;
+                        border-radius:6px;padding:8px;line-height:1.5;">
+              {item.get('body_preview','')[:200]}...
+            </div>
+          </td>
+          <td style="padding:14px 16px;border-bottom:1px solid #f1f5f9;
+                     white-space:nowrap;vertical-align:top;">
+            <div style="font-size:11px;color:#94a3b8;font-family:monospace;">
+              {item.get('date','')[:16]}
+            </div>
+          </td>
+        </tr>"""
+
+    interviews = [i for i in heard_back if i["category"] == "interview"]
+    offers     = [i for i in heard_back if i["category"] == "offer"]
+    rejections = [i for i in heard_back if i["category"] == "rejection"]
+
+    summary_pills = ""
+    if interviews: summary_pills += f'<span style="background:#fef3c7;color:#d97706;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin:3px;display:inline-block;">📞 {len(interviews)} Interview{"s" if len(interviews)>1 else ""}</span>'
+    if offers:     summary_pills += f'<span style="background:#dcfce7;color:#16a34a;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin:3px;display:inline-block;">🎉 {len(offers)} Offer{"s" if len(offers)>1 else ""}</span>'
+    if rejections: summary_pills += f'<span style="background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin:3px;display:inline-block;">❌ {len(rejections)} Rejection{"s" if len(rejections)>1 else ""}</span>'
+
+    html = f"""
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+  <div style="max-width:680px;margin:24px auto;padding:0 16px;">
+
+    <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:28px 32px;margin-bottom:20px;">
+      <div style="color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">
+        Company Response Alert
+      </div>
+      <h1 style="color:white;margin:0 0 8px;font-size:22px;font-weight:700;">
+        🔔 You Heard Back from {len(heard_back)} Compan{"ies" if len(heard_back)>1 else "y"}!
+      </h1>
+      <div style="color:#94a3b8;font-size:13px;margin-bottom:14px;">{now}</div>
+      <div>{summary_pills}</div>
+    </div>
+
+    <div style="background:white;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:20px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Company & Details</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Date</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+
+    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:600;color:#d97706;margin-bottom:6px;">💡 Quick Action</div>
+      <div style="font-size:12px;color:#92400e;line-height:1.6;">
+        Open your tracker dashboard to update application statuses and review what resume you sent and when you applied.
+        Reply to interview invitations within 24 hours for the best impression.
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:12px;color:#94a3b8;font-size:11px;">
+      Job Hunter Bot · Company Response Monitor · Built for Sri Krishna Sai Kota
+    </div>
+  </div>
+</body>
+</html>"""
+
+    subject_parts = []
+    if interviews: subject_parts.append(f"📞 {len(interviews)} Interview")
+    if offers:     subject_parts.append(f"🎉 {len(offers)} Offer")
+    if rejections: subject_parts.append(f"❌ {len(rejections)} Rejection")
+    subject = "🔔 Company Responses: " + " · ".join(subject_parts)
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = cfg["email_sender"]
+    msg["To"]      = cfg["email_recipient"]
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(cfg["email_sender"], cfg["email_password"])
+            server.sendmail(cfg["email_sender"], cfg["email_recipient"], msg.as_string())
+        print(f"  ✉️  Heard-back alert sent: {len(heard_back)} responses")
+    except Exception as e:
+        print(f"  ⚠️  Heard-back email error: {e}")
