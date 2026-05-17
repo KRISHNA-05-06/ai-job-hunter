@@ -52,7 +52,7 @@ def _parse_indeed_date(text: str) -> str:
 def build_indeed_url(role: str, location: str) -> str:
     return (
         f"https://www.indeed.com/jobs?q={quote(role)}"
-        f"&l={quote(location)}&sort=date&fromage=1"
+        f"&l={quote(location)}&sort=date&fromage=1&radius=0"
     )
 
 

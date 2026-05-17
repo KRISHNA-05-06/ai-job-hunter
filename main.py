@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 from config import SCHEDULER, SEARCH
-from data.database import init_db, job_exists, save_job, get_stats
+from data.database import init_db, job_exists, job_exists_by_title_company, save_job, save_job_seen, bulk_save_seen, get_stats
 from scrapers.linkedin_scraper  import run_linkedin_scraper
 from scrapers.jobright_scraper  import run_jobright_scraper
 from scrapers.indeed_scraper    import run_indeed_scraper
@@ -19,6 +19,7 @@ from scrapers.dice_scraper      import run_dice_scraper
 from scrapers.handshake_scraper import run_handshake_scraper
 from ai_engine.matcher import filter_jobs, preload_common_answers
 from notifier.notifications import notify_all, send_heard_back_alert
+from scrapers.recency_filter import apply_recency_filter
 try:
     from gmail_reader import process_emails
 except ImportError:
@@ -75,15 +76,28 @@ async def run_pipeline(auto_apply: bool = True):
         print(f"    {name:<12} {bar} {count}")
     print(f"  Total scraped: {len(all_scraped)} jobs")
 
+    # ── Step 1b: Recency + repost filter ─────
+    print("\n🕐 Step 1b: Applying 24-hour freshness filter...")
+    all_scraped = apply_recency_filter(all_scraped, strict=True)
+
     # ── Step 2: Deduplicate ───────────────────
     print("\n🔍 Step 2: Filtering already-seen jobs...")
-    new_jobs = [j for j in all_scraped if not job_exists(j["id"])]
+    new_jobs = [
+        j for j in all_scraped
+        if not job_exists(j["id"])
+        and not job_exists_by_title_company(j["title"], j["company"])
+    ]
     skipped  = len(all_scraped) - len(new_jobs)
     print(f"  New: {len(new_jobs)}  |  Already seen: {skipped}")
 
     if not new_jobs:
         print("  ℹ️  No new jobs this run.")
         return
+
+    # ── Save ALL new jobs as seen immediately ──
+    # This ensures even low-scoring jobs are never re-processed next run
+    bulk_save_seen(new_jobs)
+    print(f"  💾 Saved {len(new_jobs)} jobs to DB (will be skipped in future runs)")
 
     # ── Step 3: AI Scoring ────────────────────
     print(f"\n🤖 Step 3: AI scoring {len(new_jobs)} new jobs...")
@@ -96,6 +110,7 @@ async def run_pipeline(auto_apply: bool = True):
         q_by_platform = Counter(j.get("source") for j in qualifying_jobs)
         print(f"  By platform: {dict(q_by_platform)}")
 
+    # Update qualifying jobs with scores in DB
     for job in qualifying_jobs:
         save_job(job)
 

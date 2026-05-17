@@ -6,7 +6,6 @@
 (function() {
   'use strict';
 
-  // Avoid double injection
   if (window.__jobHunterInjected) return;
   window.__jobHunterInjected = true;
 
@@ -28,7 +27,7 @@
     return 'Other';
   }
 
-  // ── Job detail extractors per platform ─────────────────
+  // ── Job detail extractors ───────────────────────────────
   function extractJobDetails() {
     const platform = getPlatform();
     let title = '', company = '', location = '', description = '';
@@ -36,7 +35,7 @@
     if (platform === 'LinkedIn') {
       title       = text('.job-details-jobs-unified-top-card__job-title h1') ||
                     text('.jobs-unified-top-card__job-title') ||
-                    text('h1.t-24');
+                    text('h1.t-24') || text('h1');
       company     = text('.job-details-jobs-unified-top-card__company-name a') ||
                     text('.jobs-unified-top-card__company-name');
       location    = text('.job-details-jobs-unified-top-card__bullet') ||
@@ -46,25 +45,29 @@
 
     } else if (platform === 'Indeed') {
       title       = text('[data-testid="jobsearch-JobInfoHeader-title"] span') ||
-                    text('.jobsearch-JobInfoHeader-title');
+                    text('.jobsearch-JobInfoHeader-title') ||
+                    text('h1.jobsearch-JobInfoHeader-title') ||
+                    text('h1');
       company     = text('[data-testid="inlineHeader-companyName"] a') ||
-                    text('.jobsearch-CompanyInfoContainer a');
+                    text('[data-testid="inlineHeader-companyName"]') ||
+                    text('.jobsearch-CompanyInfoContainer a') ||
+                    text('.jobsearch-InlineCompanyRating-companyHeader');
       location    = text('[data-testid="job-location"]') ||
-                    text('.jobsearch-JobInfoHeader-subtitle span');
+                    text('[data-testid="inlineHeader-companyLocation"]') ||
+                    text('.jobsearch-JobInfoHeader-subtitle span:last-child');
       description = text('#jobDescriptionText') ||
-                    text('.jobsearch-jobDescriptionText');
+                    text('.jobsearch-jobDescriptionText') ||
+                    text('[id*="jobDescription"]');
 
     } else if (platform === 'Glassdoor') {
-      title       = text('[data-test="job-title"]') ||
-                    text('.job-title');
-      company     = text('[data-test="employer-name"]') ||
-                    text('.employer-name');
+      title       = text('[data-test="job-title"]') || text('h1');
+      company     = text('[data-test="employer-name"]');
       location    = text('[data-test="emp-location"]');
       description = text('.jobDescriptionContent') ||
                     text('[class*="JobDetails_jobDescription"]');
 
     } else if (platform === 'Dice') {
-      title       = text('h1[data-cy="jobTitle"]') || text('h1.jobTitle');
+      title       = text('h1[data-cy="jobTitle"]') || text('h1.jobTitle') || text('h1');
       company     = text('[data-cy="companyNameLink"]') || text('.company-name');
       location    = text('[data-cy="location"]') || text('.location');
       description = text('.job-description') || text('[data-cy="jobDescription"]');
@@ -82,7 +85,6 @@
       description = text('[class*="description"]') || text('[class*="detail"]');
     }
 
-    // Fallback to page title
     if (!title) title = document.title.split('|')[0].split('-')[0].trim();
 
     return {
@@ -90,7 +92,7 @@
       company:     company.trim(),
       location:    location.trim(),
       description: description.trim().substring(0, 2000),
-      platform:    platform,
+      platform:    getPlatform(),
       url:         window.location.href,
       date:        new Date().toISOString().split('T')[0],
     };
@@ -101,39 +103,28 @@
     return el ? el.innerText.trim() : '';
   }
 
-  // ── Apply button selectors ──────────────────────────────
-  const APPLY_SELECTORS = [
-    // LinkedIn
-    'button.jobs-apply-button',
-    'button[aria-label*="Easy Apply"]',
-    'button[aria-label*="Apply"]',
-    'button.jobs-s-apply button',
-    // Indeed
-    'button#indeedApplyButton',
-    'button[id*="apply"]',
-    'a[id*="apply"]',
-    // Glassdoor
-    'button[data-test="apply-button"]',
-    'a[data-test="apply-button"]',
-    // Dice
-    'a[data-cy="apply-button"]',
-    'button[data-cy="apply-button"]',
-    // Generic
-    'button[class*="apply"i]',
-    'a[class*="apply"i]',
-    'button[data-automation*="apply"i]',
+  // ── Apply button text patterns ──────────────────────────
+  const APPLY_TEXT_PATTERNS = [
+    'apply now', 'easy apply', 'apply on company site',
+    'apply for this job', 'indeedapply', 'apply',
+    'submit application', 'submit your application',
   ];
 
-  // Submit button selectors (final step)
-  const SUBMIT_SELECTORS = [
-    'button[aria-label="Submit application"]',
-    'button[data-easy-apply-next-button]',
-    'button:not([disabled])[class*="submit"i]',
-    'button:not([disabled])[aria-label*="Submit"i]',
-    'footer button[aria-label*="Submit"i]',
-  ];
+  function isApplyButton(el) {
+    if (!el) return false;
+    const tag   = el.tagName.toLowerCase();
+    const label = (
+      el.getAttribute('aria-label') ||
+      el.getAttribute('data-testid') ||
+      el.innerText ||
+      el.id || ''
+    ).toLowerCase().trim();
 
-  // ── Popup UI ────────────────────────────────────────────
+    if (tag !== 'button' && tag !== 'a') return false;
+    return APPLY_TEXT_PATTERNS.some(p => label.includes(p));
+  }
+
+  // ── Popup ───────────────────────────────────────────────
   let popupEl = null;
   let currentJobDetails = null;
 
@@ -141,22 +132,25 @@
     currentJobDetails = jobDetails;
     if (popupEl) popupEl.remove();
 
-    // Get saved resumes
     chrome.storage.local.get(['resumes'], (result) => {
       const resumes = result.resumes || [
-        'resume_v1_dataeng.pdf',
-        'resume_v2_spark.pdf',
-        'resume_v3_aws.pdf',
+        'resume_v1_general.pdf',
+        'resume_v2_spark_aws.pdf',
       ];
 
       popupEl = document.createElement('div');
       popupEl.id = 'jh-popup';
+
+      const resumeOptions = resumes.map(r =>
+        `<option value="${r}">${r}</option>`
+      ).join('') + '<option value="__custom__">+ Add new...</option>';
+
       popupEl.innerHTML = `
         <div id="jh-popup-inner">
           <div id="jh-header">
             <span id="jh-logo">🎯</span>
-            <span id="jh-title">Job Hunter</span>
-            <button id="jh-close">✕</button>
+            <span id="jh-title">Job Hunter Tracker</span>
+            <button id="jh-close" type="button">✕</button>
           </div>
           <div id="jh-job-info">
             <div id="jh-job-title">${jobDetails.title || 'Unknown Role'}</div>
@@ -164,10 +158,7 @@
           </div>
           <div id="jh-field">
             <label>Which resume did you send?</label>
-            <select id="jh-resume-select">
-              ${resumes.map(r => `<option value="${r}">${r}</option>`).join('')}
-              <option value="__custom__">+ Add new...</option>
-            </select>
+            <select id="jh-resume-select">${resumeOptions}</select>
             <input type="text" id="jh-custom-resume" placeholder="Enter resume filename..." style="display:none;margin-top:6px">
           </div>
           <div id="jh-field">
@@ -175,8 +166,8 @@
             <textarea id="jh-notes" placeholder="Recruiter name, cover letter sent, anything useful..."></textarea>
           </div>
           <div id="jh-actions">
-            <button id="jh-save">✅ Log Application</button>
-            <button id="jh-skip">Skip</button>
+            <button id="jh-save" type="button">✅ Log Application</button>
+            <button id="jh-skip" type="button">Skip</button>
           </div>
           <div id="jh-status" style="display:none"></div>
         </div>
@@ -184,18 +175,17 @@
 
       document.body.appendChild(popupEl);
 
-      // Events
-      document.getElementById('jh-close').onclick = () => popupEl.remove();
-      document.getElementById('jh-skip').onclick  = () => popupEl.remove();
-      document.getElementById('jh-save').onclick  = saveApplication;
+      // Attach all events with addEventListener (no onclick attributes)
+      document.getElementById('jh-close').addEventListener('click', () => popupEl.remove());
+      document.getElementById('jh-skip').addEventListener('click',  () => popupEl.remove());
+      document.getElementById('jh-save').addEventListener('click',  saveApplication);
 
-      document.getElementById('jh-resume-select').onchange = function() {
+      document.getElementById('jh-resume-select').addEventListener('change', function() {
         const custom = document.getElementById('jh-custom-resume');
         custom.style.display = this.value === '__custom__' ? 'block' : 'none';
         if (this.value === '__custom__') custom.focus();
-      };
+      });
 
-      // Draggable
       makeDraggable(popupEl, document.getElementById('jh-header'));
     });
   }
@@ -209,7 +199,6 @@
     if (resume === '__custom__') {
       resume = customResume.value.trim();
       if (!resume) { alert('Please enter a resume filename.'); return; }
-      // Save new resume to list
       chrome.storage.local.get(['resumes'], (r) => {
         const resumes = r.resumes || [];
         if (!resumes.includes(resume)) {
@@ -228,7 +217,6 @@
       loggedAt:    new Date().toISOString(),
     };
 
-    // Save to chrome storage
     chrome.storage.local.get(['applications'], (result) => {
       const applications = result.applications || [];
       applications.unshift(app);
@@ -236,7 +224,7 @@
         const status = document.getElementById('jh-status');
         status.style.display = 'block';
         status.textContent   = '✅ Logged! Check your tracker dashboard.';
-        setTimeout(() => popupEl && popupEl.remove(), 2000);
+        setTimeout(() => { if (popupEl) popupEl.remove(); }, 2000);
       });
     });
   }
@@ -244,60 +232,84 @@
   function makeDraggable(el, handle) {
     let x = 0, y = 0, mx = 0, my = 0;
     handle.style.cursor = 'move';
-    handle.onmousedown = (e) => {
+    handle.addEventListener('mousedown', (e) => {
       e.preventDefault();
       mx = e.clientX; my = e.clientY;
-      document.onmousemove = (e) => {
-        x = mx - e.clientX; y = my - e.clientY;
-        mx = e.clientX; my = e.clientY;
-        el.style.top  = (el.offsetTop  - y) + 'px';
-        el.style.left = (el.offsetLeft - x) + 'px';
-        el.style.right = 'auto'; el.style.bottom = 'auto';
-      };
-      document.onmouseup = () => {
-        document.onmousemove = null;
-        document.onmouseup   = null;
-      };
-    };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup',   onUp);
+    });
+    function onMove(e) {
+      x = mx - e.clientX; y = my - e.clientY;
+      mx = e.clientX; my = e.clientY;
+      el.style.top    = (el.offsetTop  - y) + 'px';
+      el.style.left   = (el.offsetLeft - x) + 'px';
+      el.style.right  = 'auto';
+      el.style.bottom = 'auto';
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+    }
   }
 
-  // ── Button detection ────────────────────────────────────
-  function attachApplyListeners() {
-    const platform = getPlatform();
-
-    // Watch for apply button clicks
-    document.addEventListener('click', (e) => {
-      const el = e.target.closest('button, a');
-      if (!el) return;
-
-      const isApply = APPLY_SELECTORS.some(sel => {
-        try { return el.matches(sel); } catch { return false; }
-      });
-
-      const label = (el.getAttribute('aria-label') || el.innerText || '').toLowerCase();
-      const isApplyText = label.includes('apply') || label.includes('easy apply');
-
-      if (isApply || isApplyText) {
-        // Small delay so page updates first
-        setTimeout(() => {
-          const details = extractJobDetails();
-          if (details.title) {
-            // For LinkedIn Easy Apply — show after submit button is clicked
-            if (platform === 'LinkedIn' && label.includes('easy apply')) {
-              watchForSubmit(details);
-            } else {
-              showPopup(details);
-            }
-          }
-        }, 800);
-      }
-    }, true);
-  }
-
-  function watchForSubmit(jobDetails) {
-    // Watch for final Submit click on LinkedIn multi-step form
+  // ── Indeed specific: watch for apply modal ──────────────
+  function watchIndeedApplyModal() {
     const observer = new MutationObserver(() => {
-      SUBMIT_SELECTORS.forEach(sel => {
+      // Indeed apply modal appears with this selector
+      const modal = document.querySelector(
+        '[id*="apply-modal"], [class*="ApplyModal"], #indeedApplyModal, [data-testid*="apply"]'
+      );
+      if (modal && !modal.__jhWatched) {
+        modal.__jhWatched = true;
+        // Watch for submit inside the modal
+        const submitObserver = new MutationObserver(() => {
+          const submitBtn = modal.querySelector(
+            'button[type="submit"], button[data-testid*="submit"], button[aria-label*="Submit"]'
+          );
+          if (submitBtn && !submitBtn.__jhListened) {
+            submitBtn.__jhListened = true;
+            submitBtn.addEventListener('click', () => {
+              setTimeout(() => showPopup(extractJobDetails()), 2000);
+            });
+          }
+        });
+        submitObserver.observe(modal, { childList: true, subtree: true });
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // ── Global click listener ───────────────────────────────
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('button, a, [role="button"]');
+    if (!el) return;
+
+    if (isApplyButton(el)) {
+      const platform = getPlatform();
+      setTimeout(() => {
+        const details = extractJobDetails();
+        if (!details.title) return;
+
+        if (platform === 'LinkedIn') {
+          // LinkedIn Easy Apply — wait for submit step
+          watchForLinkedInSubmit(details);
+        } else {
+          // For Indeed, Glassdoor, Dice etc — show popup after short delay
+          // (gives time for any redirect/modal to load)
+          setTimeout(() => showPopup(details), 1500);
+        }
+      }, 500);
+    }
+  }, true);
+
+  function watchForLinkedInSubmit(jobDetails) {
+    const SUBMIT_SELS = [
+      'button[aria-label="Submit application"]',
+      'button[aria-label*="Submit"]',
+      'footer button:last-child',
+    ];
+    const observer = new MutationObserver(() => {
+      SUBMIT_SELS.forEach(sel => {
         const btn = document.querySelector(sel);
         if (btn && !btn.__jhListened) {
           btn.__jhListened = true;
@@ -308,12 +320,24 @@
       });
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    // Auto-stop after 10 minutes
     setTimeout(() => observer.disconnect(), 600000);
   }
 
-  // ── Init ────────────────────────────────────────────────
-  attachApplyListeners();
+  // ── Also watch for URL changes (Indeed SPA navigation) ──
+  let lastUrl = location.href;
+  new MutationObserver(() => {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      // Re-init on page change
+      window.__jobHunterInjected = false;
+    }
+  }).observe(document, { subtree: true, childList: true });
+
+  // ── Init Indeed modal watcher ───────────────────────────
+  if (getPlatform() === 'Indeed') {
+    watchIndeedApplyModal();
+  }
+
   console.log('🎯 Job Hunter Tracker active on', getPlatform());
 
 })();

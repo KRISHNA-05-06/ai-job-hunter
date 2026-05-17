@@ -110,7 +110,7 @@
       <h1>Application <span>Tracker</span></h1>
       <p class="subtitle">Sri Krishna Sai Kota · Data Engineer Job Search 2026</p>
     </div>
-    <button class="btn-add" onclick="toggleForm()">+ Log Application</button>
+    <button class="btn-add" id="btnToggleForm">+ Log Application</button>
   </div>
 
   <div class="stats-bar" id="statsBar"></div>
@@ -141,15 +141,15 @@
         <span style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text)">Companies That Responded</span>
         <span id="heardBackBadge" style="background:var(--yellow);color:#1a1200;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:4px"></span>
         <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="lastSynced"></span>
-        <button onclick="syncFromGitHub()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sync</button>
+        <button id="syncBtn" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sync</button>
       </div>
       <div id="heardBackList" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('apps',this)">Applications</button>
-    <button class="tab" onclick="switchTab('charts',this)">Analytics</button>
+    <button class="tab active" data-tab="apps">Applications</button>
+    <button class="tab" data-tab="charts">Analytics</button>
   </div>
 
   <div class="add-form" id="addForm">
@@ -183,8 +183,8 @@
       </div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" onclick="saveApp()">Save</button>
-      <button class="btn btn-secondary" onclick="toggleForm()">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveApp">Save</button>
+      <button class="btn btn-secondary" id="btnCancelForm">Cancel</button>
     </div>
   </div>
 
@@ -193,13 +193,13 @@
       <div class="section-title" id="listTitle">All Applications</div>
     </div>
     <div class="filter-bar">
-      <button class="fb active" onclick="setFilter('all',this)">All</button>
-      <button class="fb" onclick="setFilter('applied',this)">Applied</button>
-      <button class="fb" onclick="setFilter('interview',this)">Interview</button>
-      <button class="fb" onclick="setFilter('offer',this)">Offer</button>
-      <button class="fb" onclick="setFilter('rejected',this)">Rejected</button>
-      <button class="fb" onclick="setFilter('ghosted',this)">Ghosted</button>
-      <input class="si" placeholder="Search..." oninput="setSearch(this.value)">
+      <button class="fb active" data-filter="all">All</button>
+      <button class="fb" data-filter="applied">Applied</button>
+      <button class="fb" data-filter="interview">Interview</button>
+      <button class="fb" data-filter="offer">Offer</button>
+      <button class="fb" data-filter="rejected">Rejected</button>
+      <button class="fb" data-filter="ghosted">Ghosted</button>
+      <input class="si" placeholder="Search..." id="searchInp">
     </div>
     <div class="apps-list" id="appsList"></div>
   </div>

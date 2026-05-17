@@ -93,6 +93,64 @@ def job_exists(job_id: str) -> bool:
     return row is not None
 
 
+
+
+def job_exists_by_title_company(title: str, company: str) -> bool:
+    """
+    Secondary check — if same title+company already in DB, it's a repost.
+    Catches cases where URL changed but job is the same.
+    """
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT 1 FROM jobs WHERE LOWER(title)=LOWER(?) AND LOWER(company)=LOWER(?)",
+        (title.strip(), company.strip())
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+def save_job_seen(job: dict):
+    """
+    Save a job as 'seen' so it's never processed again — even if it scored too low.
+    This prevents re-scraping and re-scoring the same jobs every run.
+    """
+    conn = get_connection()
+    conn.execute("""
+        INSERT OR IGNORE INTO jobs
+        (id, title, company, location, job_type, description, url, source,
+         match_score, match_reason, posted_at, status)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (
+        job["id"], job["title"], job["company"], job.get("location",""),
+        job.get("job_type",""), job.get("description",""), job["url"],
+        job["source"], job.get("match_score", 0), job.get("match_reason",""),
+        job.get("posted_at",""), job.get("status", "seen")
+    ))
+    conn.commit()
+    conn.close()
+
+
+def bulk_save_seen(jobs: list[dict]):
+    """Save a batch of jobs as seen — much faster than individual saves."""
+    if not jobs:
+        return
+    conn = get_connection()
+    conn.executemany("""
+        INSERT OR IGNORE INTO jobs
+        (id, title, company, location, job_type, description, url, source,
+         match_score, match_reason, posted_at, status)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+    """, [
+        (
+            job["id"], job["title"], job["company"], job.get("location",""),
+            job.get("job_type",""), job.get("description",""), job["url"],
+            job["source"], job.get("match_score", 0), job.get("match_reason",""),
+            job.get("posted_at",""), job.get("status", "seen")
+        )
+        for job in jobs
+    ])
+    conn.commit()
+    conn.close()
+
 def save_job(job: dict):
     conn = get_connection()
     conn.execute("""

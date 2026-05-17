@@ -26,7 +26,7 @@ def build_linkedin_url(role: str, location: str) -> str:
     return (
         f"https://www.linkedin.com/jobs/search/"
         f"?keywords={role_enc}&location={loc_enc}"
-        f"&f_TPR=r86400&f_E=2%2C3&sortBy=DD"
+        f"&f_TPR=r86400&sortBy=DD"
     )
 
 

@@ -278,3 +278,48 @@ syncFromGitHub();
 // Re-sync every 30 minutes
 setInterval(syncFromGitHub, 30 * 60 * 1000);
 
+
+
+// ── Attach all event listeners (no inline onclick allowed in extensions) ──
+document.addEventListener('DOMContentLoaded', () => {
+
+  // + Log Application button
+  const btnToggle = document.getElementById('btnToggleForm');
+  if (btnToggle) btnToggle.addEventListener('click', toggleForm);
+
+  // Save button
+  const btnSave = document.getElementById('btnSaveApp');
+  if (btnSave) btnSave.addEventListener('click', saveApp);
+
+  // Cancel button
+  const btnCancel = document.getElementById('btnCancelForm');
+  if (btnCancel) btnCancel.addEventListener('click', toggleForm);
+
+  // Search input
+  const searchInp = document.getElementById('searchInp');
+  if (searchInp) searchInp.addEventListener('input', (e) => setSearch(e.target.value));
+
+  // Target inputs
+  const dTarget = document.getElementById('dTarget');
+  const wTarget = document.getElementById('wTarget');
+  if (dTarget) dTarget.addEventListener('change', saveTarget);
+  if (wTarget) wTarget.addEventListener('change', saveTarget);
+
+  // Filter buttons (data-filter attribute)
+  document.querySelectorAll('[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setFilter(btn.dataset.filter, btn);
+    });
+  });
+
+  // Tab buttons (data-tab attribute)
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchTab(btn.dataset.tab, btn);
+    });
+  });
+
+  // Sync button
+  const syncBtn = document.getElementById('syncBtn');
+  if (syncBtn) syncBtn.addEventListener('click', syncFromGitHub);
+});
