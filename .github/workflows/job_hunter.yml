@@ -22,7 +22,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: true
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -137,8 +136,17 @@ jobs:
         run: |
           git config user.name "Job Hunter Bot"
           git config user.email "bot@jobhunter.com"
+          git config pull.rebase false
           if [ -f data/email_updates.json ]; then
             git add data/email_updates.json
-            git diff --staged --quiet || git commit -m "Update email_updates.json [skip ci]"
-            git push
+            if ! git diff --staged --quiet; then
+              git pull origin main --no-edit 2>/dev/null || true
+              git commit -m "Update email_updates.json [skip ci]"
+              git push origin main
+              echo "✅ email_updates.json committed and pushed"
+            else
+              echo "ℹ️  No changes to email_updates.json"
+            fi
+          else
+            echo "⚠️  email_updates.json not found"
           fi
