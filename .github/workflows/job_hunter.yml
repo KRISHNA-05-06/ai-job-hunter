@@ -113,13 +113,6 @@ jobs:
           key: jobs-db-${{ github.run_id }}
           restore-keys: jobs-db-
 
-      - name: Restore email updates
-        uses: actions/cache@v4
-        with:
-          path: data/email_updates.json
-          key: email-updates-${{ github.run_id }}
-          restore-keys: email-updates-
-
       - name: Create data directory
         run: mkdir -p data
 
@@ -131,22 +124,3 @@ jobs:
         with:
           path: data/jobs.db
           key: jobs-db-${{ github.run_id }}
-
-      - name: Commit email_updates.json to repo
-        run: |
-          git config user.name "Job Hunter Bot"
-          git config user.email "bot@jobhunter.com"
-          git config pull.rebase false
-          if [ -f data/email_updates.json ]; then
-            git add data/email_updates.json
-            if ! git diff --staged --quiet; then
-              git pull origin main --no-edit 2>/dev/null || true
-              git commit -m "Update email_updates.json [skip ci]"
-              git push origin main
-              echo "✅ email_updates.json committed and pushed"
-            else
-              echo "ℹ️  No changes to email_updates.json"
-            fi
-          else
-            echo "⚠️  email_updates.json not found"
-          fi
