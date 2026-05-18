@@ -18,14 +18,8 @@ from scrapers.glassdoor_scraper import run_glassdoor_scraper
 from scrapers.dice_scraper      import run_dice_scraper
 from scrapers.handshake_scraper import run_handshake_scraper
 from ai_engine.matcher import filter_jobs, preload_common_answers
-from notifier.notifications import notify_all, send_heard_back_alert
+from notifier.notifications import notify_all
 from scrapers.recency_filter import apply_recency_filter
-try:
-    from gmail_reader import process_emails
-except ImportError:
-    def process_emails():
-        print("  ℹ️  Gmail reader not available.")
-        return {}
 #from apply_bot.auto_apply import run_auto_apply
 try:
     from apply_bot.auto_apply import run_auto_apply
@@ -122,17 +116,6 @@ async def run_pipeline(auto_apply: bool = True):
     # ── Step 4: Notify ────────────────────────
     print(f"\n🔔 Step 4: Sending email (grouped by platform)...")
     notify_all(qualifying_jobs)
-
-    # ── Step 5b: Read Gmail for responses ─────
-    print(f"\n📧 Step 5b: Reading Gmail for company responses...")
-    try:
-        email_data = process_emails()
-        heard_back = email_data.get("heard_back", [])
-        if heard_back:
-            send_heard_back_alert(heard_back)
-            print(f"  🔔 Heard back from {len(heard_back)} companies!")
-    except Exception as e:
-        print(f"  ⚠️  Gmail reading failed: {e}")
 
     # ── Step 5: Auto Apply ────────────────────
     if auto_apply:
