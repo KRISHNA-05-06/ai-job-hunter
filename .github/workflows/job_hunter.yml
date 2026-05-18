@@ -9,9 +9,6 @@ on:
     - cron: '0 22 * * *'   # 6:00 PM EDT
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   scrape-and-notify:
     runs-on: ubuntu-latest
@@ -20,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -111,13 +106,14 @@ jobs:
         with:
           path: data/jobs.db
           key: jobs-db-${{ github.run_id }}
-          restore-keys: jobs-db-
+          restore-keys: |
+            jobs-db-
 
       - name: Create data directory
         run: mkdir -p data
 
-      - name: Run Job Hunter + Gmail Reader
-        run: python main.py --once --no-apply
+      - name: Run Job Hunter
+        run: python main.py --once
 
       - name: Save jobs database
         uses: actions/cache@v4

@@ -1,6 +1,6 @@
 """
 Main Orchestrator — scrapes LinkedIn, Indeed, Glassdoor, Dice, Handshake, JobRight
-Runs the full pipeline: Scrape → Score → Notify (grouped by platform) → Apply
+Pipeline: Scrape → Filter → Score → Email
 """
 import asyncio
 import time
@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 from config import SCHEDULER, SEARCH
-from data.database import init_db, job_exists, job_exists_by_title_company, save_job, save_job_seen, bulk_save_seen, get_stats
+from data.database import init_db, job_exists, job_exists_by_title_company, save_job, bulk_save_seen, get_stats
 from scrapers.linkedin_scraper  import run_linkedin_scraper
 from scrapers.jobright_scraper  import run_jobright_scraper
 from scrapers.indeed_scraper    import run_indeed_scraper
@@ -20,12 +20,6 @@ from scrapers.handshake_scraper import run_handshake_scraper
 from ai_engine.matcher import filter_jobs, preload_common_answers
 from notifier.notifications import notify_all
 from scrapers.recency_filter import apply_recency_filter
-#from apply_bot.auto_apply import run_auto_apply
-try:
-    from apply_bot.auto_apply import run_auto_apply
-except ImportError:
-    async def run_auto_apply(jobs):
-        print("  ℹ️  Auto-apply module not available in this environment.")
 
 
 SCRAPERS = [
@@ -49,7 +43,7 @@ def print_banner():
     """)
 
 
-async def run_pipeline(auto_apply: bool = True):
+async def run_pipeline():
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"\n{'='*54}")
     print(f"  🔄 Pipeline started: {now}")
@@ -75,7 +69,7 @@ async def run_pipeline(auto_apply: bool = True):
         print(f"    {name:<12} {bar} {count}")
     print(f"  Total scraped: {len(all_scraped)} jobs")
 
-    # ── Step 1b: Recency + repost filter ─────
+    # ── Step 1b: 24-hour freshness filter ─────
     print("\n🕐 Step 1b: Applying 24-hour freshness filter...")
     all_scraped = apply_recency_filter(all_scraped, strict=True)
 
@@ -86,63 +80,47 @@ async def run_pipeline(auto_apply: bool = True):
         if not job_exists(j["id"])
         and not job_exists_by_title_company(j["title"], j["company"])
     ]
-    skipped  = len(all_scraped) - len(new_jobs)
+    skipped = len(all_scraped) - len(new_jobs)
     print(f"  New: {len(new_jobs)}  |  Already seen: {skipped}")
 
     if not new_jobs:
         print("  ℹ️  No new jobs this run.")
         return
 
-    # ── Save ALL new jobs as seen immediately ──
-    # This ensures even low-scoring jobs are never re-processed next run
+    # Save ALL new jobs immediately so they're skipped next run
     bulk_save_seen(new_jobs)
-    print(f"  💾 Saved {len(new_jobs)} jobs to DB (will be skipped in future runs)")
+    print(f"  💾 Saved {len(new_jobs)} jobs to DB")
 
     # ── Step 3: AI Scoring ────────────────────
     print(f"\n🤖 Step 3: AI scoring {len(new_jobs)} new jobs...")
     qualifying_jobs = filter_jobs(new_jobs)
     print(f"  Qualifying (score ≥ {SEARCH['min_match_score']}): {len(qualifying_jobs)}")
 
-    # Show qualifying breakdown by platform
     if qualifying_jobs:
         from collections import Counter
         q_by_platform = Counter(j.get("source") for j in qualifying_jobs)
         print(f"  By platform: {dict(q_by_platform)}")
 
-    # Update qualifying jobs with scores in DB
     for job in qualifying_jobs:
         save_job(job)
 
-    # ── Step 4: Notify ────────────────────────
-    print(f"\n🔔 Step 4: Sending email (grouped by platform)...")
+    # ── Step 4: Send email alert ──────────────
+    print(f"\n🔔 Step 4: Sending email alert...")
     notify_all(qualifying_jobs)
-
-    # ── Step 5: Auto Apply ────────────────────
-    if auto_apply:
-        apply_candidates = [j for j in qualifying_jobs
-                           if j.get("recommendation") == "apply"
-                           and j.get("source") == "LinkedIn"]
-        print(f"\n🚀 Step 5: Auto-applying to {len(apply_candidates)} LinkedIn jobs...")
-        await run_auto_apply(apply_candidates)
-    else:
-        print("\n⏭️  Step 5: Auto-apply skipped (manual mode)")
 
     # ── Summary ───────────────────────────────
     stats = get_stats()
     print(f"""
 📊 Session Summary:
-   • Platforms scraped     : {len([c for c in platform_counts.values() if c > 0])}/{len(SCRAPERS)}
-   • Total jobs scraped    : {len(all_scraped)}
-   • New jobs found        : {len(new_jobs)}
-   • Qualifying (≥score)   : {len(qualifying_jobs)}
-   • Total in DB           : {stats['total_jobs']}
-   • Applied (all time)    : {stats['applied']}
-   • Applied today         : {stats['today_applied']}
-   • Q&A answers stored    : {stats['qa_answers']}
+   • Platforms scraped  : {len([c for c in platform_counts.values() if c > 0])}/{len(SCRAPERS)}
+   • Total scraped      : {len(all_scraped)}
+   • New jobs found     : {len(new_jobs)}
+   • Qualifying         : {len(qualifying_jobs)}
+   • Total in DB        : {stats['total_jobs']}
     """)
 
 
-def run_scheduler(auto_apply: bool = True):
+def run_scheduler():
     interval = SCHEDULER["check_interval_minutes"] * 60
     print_banner()
     init_db()
@@ -152,7 +130,7 @@ def run_scheduler(auto_apply: bool = True):
 
     while True:
         try:
-            asyncio.run(run_pipeline(auto_apply=auto_apply))
+            asyncio.run(run_pipeline())
         except KeyboardInterrupt:
             print("\n👋 Scheduler stopped.")
             break
@@ -163,23 +141,21 @@ def run_scheduler(auto_apply: bool = True):
         time.sleep(interval)
 
 
-def run_once(auto_apply: bool = False):
+def run_once():
     print_banner()
     init_db()
     preload_common_answers()
-    asyncio.run(run_pipeline(auto_apply=auto_apply))
+    asyncio.run(run_pipeline())
 
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Job Hunter Bot")
     parser.add_argument("--once",     action="store_true", help="Run once and exit")
-    parser.add_argument("--no-apply", action="store_true", help="No auto-apply")
     parser.add_argument("--schedule", action="store_true", help="Run on schedule")
     args = parser.parse_args()
 
-    auto_apply = not args.no_apply
     if args.once:
-        run_once(auto_apply=auto_apply)
+        run_once()
     else:
-        run_scheduler(auto_apply=auto_apply)
+        run_scheduler()
